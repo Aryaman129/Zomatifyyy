@@ -4,33 +4,39 @@ import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js"; // ✅ Import authentication routes
 
-dotenv.config(); // Load environment variables from .env
+dotenv.config(); // Load environment variables
 
-// Check if environment variables are set
+// 🔍 DEBUG: Check if environment variables are loaded
+console.log("🔍 Checking Environment Variables...");
+console.log("SUPABASE_URL:", process.env.SUPABASE_URL || "❌ MISSING");
+console.log("SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY ? "✅ FOUND" : "❌ MISSING");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ FOUND" : "❌ MISSING");
+
+// ❌ STOP SERVER IF VARIABLES ARE MISSING
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY || !process.env.JWT_SECRET) {
-  console.error("❌ Missing Supabase URL, API Key, or JWT Secret in .env");
-  process.exit(1); // Stop the server if missing
+  console.error("❌ ERROR: Missing required environment variables.");
+  process.exit(1);
 }
+
+// ✅ Initialize Supabase
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+console.log("✅ Connected to Supabase");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors()); // Allow all origins (adjust if needed)
-app.use(express.json()); // Parse JSON requests
+app.use(cors()); 
+app.use(express.json());
 
-// Initialize Supabase
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-console.log("✅ Connected to Supabase");
-
-// Test Route
+// ✅ Test Route to Ensure API Works
 app.get("/api/test", (req, res) => {
-  res.json({ message: "API is working!" });
+  res.json({ message: "✅ API is working!" });
 });
 
-// 👇 Add authentication routes
+// ✅ Authentication Routes
 app.use("/api/auth", authRoutes);
 
-// Fetch Orders from Supabase
+// ✅ Fetch Orders from Supabase
 app.get("/api/orders", async (req, res) => {
   try {
     const { data, error } = await supabase.from("orders").select("*");
@@ -41,7 +47,7 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
-// Add New Order
+// ✅ Add New Order
 app.post("/api/orders", async (req, res) => {
   try {
     const { name, items, total, address, canteen } = req.body;
@@ -58,6 +64,7 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
-// ✅ Fix: Start the server only once
+// ✅ Start Server
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
 
