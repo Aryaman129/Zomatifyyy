@@ -2,12 +2,13 @@ import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import authRoutes from "./routes/auth.js"; // ✅ Import authentication routes
 
 dotenv.config(); // Load environment variables from .env
 
 // Check if environment variables are set
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-  console.error("❌ Missing Supabase URL or API Key in .env");
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY || !process.env.JWT_SECRET) {
+  console.error("❌ Missing Supabase URL, API Key, or JWT Secret in .env");
   process.exit(1); // Stop the server if missing
 }
 
@@ -25,6 +26,9 @@ console.log("✅ Connected to Supabase");
 app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
 });
+
+// 👇 Add authentication routes
+app.use("/api/auth", authRoutes);
 
 // Fetch Orders from Supabase
 app.get("/api/orders", async (req, res) => {
@@ -56,3 +60,4 @@ app.post("/api/orders", async (req, res) => {
 
 // ✅ Fix: Start the server only once
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
