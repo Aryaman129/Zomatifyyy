@@ -1,6 +1,7 @@
 {
   "name": "zomatifyyy",
   "version": "1.0.0",
+<<<<<<< HEAD
   "description": "Food ordering backend using Supabase & Railway",
   "main": "server.js",
   "type": "module",
@@ -16,5 +17,33 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
+=======
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aryaman129/zomatifyyy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aryaman129/zomatifyyy/issues"
+  },
+  "homepage": "https://github.com/Aryaman129/zomatifyyy#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "razorpay": "^2.9.5",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1"
+>>>>>>> 1f6d08c (Added backend server with Supabase support)
   }
 }

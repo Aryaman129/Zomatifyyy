@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopkeeper Dashboard - Zomatify</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Shopkeeper Dashboard</h1>
+
+    <!-- Menu Management Section -->
+    <h2>Manage Menu</h2>
+    <form id="menuForm">
+        <input type="text" id="menuItemName" placeholder="Item Name" required>
+        <input type="number" id="menuItemPrice" placeholder="Price (INR)" required>
+        <button type="submit">Add Item</button>
+    </form>
+    
+    <h3>Current Menu:</h3>
+    <ul id="menuList"></ul>
+
+    <!-- Active Orders Section -->
+    <h2>Active Orders (<span id="activeOrdersCount">0</span>/50)</h2>
+    <div id="orders"></div>
+
+    <script>
+        const socket = io();
+        
+        // Fetch Orders and Update UI
+        async function fetchOrders() {
+            const response = await fetch('/orders');
+            const orders = await response.json();
+            const activeOrders = orders.filter(order => order.status === 'Pending' || order.status === 'Preparing');
+            document.getElementById('activeOrdersCount').textContent = activeOrders.length;
+
+            const orderList = document.getElementById('orders');
+            orderList.innerHTML = '';
+            orders.forEach(order => {
+                orderList.innerHTML += `
+                    <div class="order">
+                        <p><strong>Order ID:</strong> ${order.orderId}</p>
+                        <p><strong>Items:</strong> ${order.items.join(', ')}</p>
+                        <p><strong>Delivery Address:</strong> ${order.deliveryAddress}</p>
+                        <p><strong>Status:</strong> ${order.status}</p>
+                        <button onclick="updateStatus('${order.orderId}', 'Preparing')">Preparing</button>
+                        <button onclick="updateStatus('${order.orderId}', 'Ready')">Ready</button>
+                        <button onclick="updateStatus('${order.orderId}', 'Delivered')">Delivered</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Update Order Status
+        async function updateStatus(orderId, status) {
+            await fetch(`/update-status/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            fetchOrders();
+        }
+
+        // Fetch Menu Items
+        async function fetchMenu() {
+            const response = await fetch('/menu');
+            const menu = await response.json();
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = '';
+            menu.forEach(item => {
+                menuList.innerHTML += `<li>${item.name} - ₹${item.price} <button onclick="deleteMenuItem('${item.id}')">Remove</button></li>`;
+            });
+        }
+
+        // Add New Menu Item
+        document.getElementById('menuForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('menuItemName').value;
+            const price = document.getElementById('menuItemPrice').value;
+            
+            await fetch('/menu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price })
+            });
+
+            fetchMenu();
+        });
+
+        // Delete Menu Item
+        async function deleteMenuItem(id) {
+            await fetch(`/menu/${id}`, { method: 'DELETE' });
+            fetchMenu();
+        }
+
+        socket.on('newOrder', () => {
+            alert('New Order Received!');
+            fetchOrders();
+        });
+
+        fetchOrders();
+        fetchMenu();
+    </script>
+</body>
+</html>
+

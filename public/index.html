@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Zomatify - Place Order</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    </head>    
+<body>
+    <h1>Place Your Order</h1>
+    <form id="orderForm">
+        <input type="text" id="customerName" placeholder="Your Name" required><br>
+        <input type="text" id="items" placeholder="Items (comma-separated)" required><br>
+        <input type="number" id="amount" placeholder="Total Amount (INR)" required><br>
+        <input type="text" id="deliveryAddress" placeholder="Delivery Address" required><br>
+        <select id="shopId" required>
+            <option value="shop1">Canteen A</option>
+            <option value="shop2">Canteen B</option>
+        </select><br>
+        <button type="submit">Place Order</button>
+    </form>
+
+    <div id="queueInfo"></div>
+
+    <script>
+        document.getElementById("orderForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const orderData = {
+                customerName: document.getElementById("customerName").value,
+                items: document.getElementById("items").value.split(","),
+                amount: document.getElementById("amount").value,
+                deliveryAddress: document.getElementById("deliveryAddress").value,
+                shopId: document.getElementById("shopId").value
+            };
+
+            const response = await fetch("/place-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData)
+            });
+
+            const data = await response.json();
+            document.getElementById("queueInfo").innerText = `Your Queue Position: ${data.queuePosition}`;
+        });
+    </script>
+</body>
+</html>
